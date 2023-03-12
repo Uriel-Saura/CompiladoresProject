@@ -44,6 +44,9 @@ public class Scanner {
          */
 
         String readChain = source;
+        String subChain;
+        String concatChain = "";
+        Double numberChain = 0.0;
 
         int large;
         large = readChain.length();
@@ -56,72 +59,81 @@ public class Scanner {
             String c = readChain.substring(i,i+1);
             System.out.println(c);
 
-            switch (state){
+            switch (state) {
                 case 0:
-                    if (c.equals("(")){
-                        tokens.add(new Token(TipoToken.LEFT_PARANTHESIS, "(", null, linea));
-                    } else if (c.equals(")")){
-                        tokens.add(new Token(TipoToken.RIGHT_PARANTHESIS, ")", null, linea));
-                    } else if (c.equals("{")) {
-                        tokens.add(new Token(TipoToken.LEFT_BRACKET, "{", null, linea));
-                    } else if (c.equals("}")) {
-                        tokens.add(new Token(TipoToken.RIGHT_BRACKET, "}", null, linea));
-                    } else if (c.equals(",")) {
-                        tokens.add(new Token(TipoToken.COMMA, ",", null, linea));
-                    } else if (c.equals(".")) {
-                        tokens.add(new Token(TipoToken.POINT, ".", null, linea));
-                    } else if (c.equals("/")) {
-                        tokens.add(new Token(TipoToken.SLASH, "/", null, linea));
-                    } else if (c.equals("-")) {
-                        tokens.add(new Token(TipoToken.MINUS_SIGN, "-", null, linea));
-                    } else if (c.equals("+")) {
-                        tokens.add(new Token(TipoToken.PLUS_SIGN, "+", null, linea));
-                    } else if (c.equals("*")) {
-                        tokens.add(new Token(TipoToken.MULTIPLICATION_SIGN, "*", null, linea));
-                    } else if (c.equals(";")) {
-                        tokens.add(new Token(TipoToken.SEMICOLON, ";", null, linea));
-                    } else if (c.equals("!")) {
-                        if(readChain.charAt(i+1) == '=') {
-                            tokens.add(new Token(TipoToken.NOT_EQUALS_OPERATOR, "!=", null, linea));
-                            i++;
-                        } else
-                            tokens.add(new Token(TipoToken.NEGATE_OPERATOR, "!", null, linea));
-                    } else if (c.equals("=")) {
-                        if(readChain.charAt(i+1) == '=') {
-                            tokens.add(new Token(TipoToken.EQUALS_OPERATOR, "==", null, linea));
-                            i++;
-                        } else
-                            tokens.add(new Token(TipoToken.EQUALS_SIGN, "=", null, linea));
-                    } else if (c.equals("<")) {
-                        if(readChain.charAt(i+1) == '=') {
-                            tokens.add(new Token(TipoToken.LESS_THAN_EQUALS, "<=", null, linea));
-                            i++;
-                        } else
-                            tokens.add(new Token(TipoToken.LESS_THAN, "<", null, linea));
-                    } else if (c.equals(">")) {
-                        if(readChain.charAt(i+1) == '=') {
-                            tokens.add(new Token(TipoToken.GREATHER_THAN_EQUALS, ">=", null, linea));
-                            i++;
-                        } else
-                            tokens.add(new Token(TipoToken.GREATER_THAN, ">", null, linea));
-                    } else if(c.equals("a")){
-                        state = 10;
-                        //tomar la posicionde inicio del lexema
-                    } else {
-                        tokens.add(new Token(TipoToken.EOF, "", null, linea));
+                    switch (c) {
+                        case "(" -> tokens.add(new Token(TipoToken.LEFT_PARANTHESIS, "(", null, linea));
+                        case ")" -> tokens.add(new Token(TipoToken.RIGHT_PARANTHESIS, ")", null, linea));
+                        case "{" -> tokens.add(new Token(TipoToken.LEFT_BRACKET, "{", null, linea));
+                        case "}" -> tokens.add(new Token(TipoToken.RIGHT_BRACKET, "}", null, linea));
+                        case "," -> tokens.add(new Token(TipoToken.COMMA, ",", null, linea));
+                        case "." -> tokens.add(new Token(TipoToken.POINT, ".", null, linea));
+                        case "/" -> tokens.add(new Token(TipoToken.SLASH, "/", null, linea));
+                        case "-" -> tokens.add(new Token(TipoToken.MINUS_SIGN, "-", null, linea));
+                        case "+" -> tokens.add(new Token(TipoToken.PLUS_SIGN, "+", null, linea));
+                        case "*" -> tokens.add(new Token(TipoToken.MULTIPLICATION_SIGN, "*", null, linea));
+                        case ";" -> tokens.add(new Token(TipoToken.SEMICOLON, ";", null, linea));
+                        case "!" -> {
+                            if (readChain.charAt(i + 1) == '=') {
+                                tokens.add(new Token(TipoToken.NOT_EQUALS_OPERATOR, "!=", null, linea));
+                                i++;
+                            } else
+                                tokens.add(new Token(TipoToken.NEGATE_OPERATOR, "!", null, linea));
+                        }
+                        case "=" -> {
+                            if (readChain.charAt(i + 1) == '=') {
+                                tokens.add(new Token(TipoToken.EQUALS_OPERATOR, "==", null, linea));
+                                i++;
+                            } else
+                                tokens.add(new Token(TipoToken.EQUALS_SIGN, "=", null, linea));
+                        }
+                        case "<" -> {
+                            if (readChain.charAt(i + 1) == '=') {
+                                tokens.add(new Token(TipoToken.LESS_THAN_EQUALS, "<=", null, linea));
+                                i++;
+                            } else
+                                tokens.add(new Token(TipoToken.LESS_THAN, "<", null, linea));
+                        }
+                        case ">" -> {
+                            if (readChain.charAt(i + 1) == '=') {
+                                tokens.add(new Token(TipoToken.GREATHER_THAN_EQUALS, ">=", null, linea));
+                                i++;
+                            } else
+                                tokens.add(new Token(TipoToken.GREATER_THAN, ">", null, linea));
+                        }
+
+                        default -> {
+                            if (c.matches("[A-Za-z0-9]")){
+                                state = 10;
+                                i--;
+                            }
+                        }
                     }
                     break;
                 case 10:
-                    if (c.equals("a") || c.equals("0")){
-                    } else if (c.equals(")")){
-                        // generar el token
-                        // retroceder i en 1
+                    if (c.matches("[A-Za-z0-9.]")) {
+                            subChain = readChain.substring(i,i+1);
+                            concatChain = concatChain.concat(subChain);
+                    } else {
+                        if (concatChain.matches("[0-9.]+")){
+                            try {
+                                numberChain = Double.parseDouble(concatChain);
+                            }catch (NumberFormatException ex){
+                                ex.printStackTrace();
+                            }
+                            tokens.add(new Token(TipoToken.NUMBER, "Number",numberChain , linea));
+                        } else{
+                            tokens.add(new Token(TipoToken.TEXT, "Text",concatChain , linea));
+                        }
 
-                        //comparar el lexema con las palabras reservadas
-                        //Si coincide, creas el token correspondiente para la palabra reservada
-                        // caso contrario creas el token de identificador
-
+                        state = 0;
+                        i--;
                     }
+                    // generar el token
+                    // retroceder i en 1
+                    //comparar el lexema con las palabras reservadas
+                    //Si coincide, creas el token correspondiente para la palabra reservada
+                    // caso contrario creas el token de identificador
 
                     break;
 
@@ -129,7 +141,7 @@ public class Scanner {
 
 
         }
-
+        tokens.add(new Token(TipoToken.EOF, "", null, linea));
         return tokens;
     }
 
