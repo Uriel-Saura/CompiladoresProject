@@ -18,7 +18,7 @@ public class Scanner {
         palabrasReservadas.put("else", TipoToken.ELSE);
         palabrasReservadas.put("false",TipoToken.FALSE );
         palabrasReservadas.put("for", TipoToken.FOR);
-        palabrasReservadas.put("func",TipoToken.FUNC ); //definir funciones
+        palabrasReservadas.put("func",TipoToken.FUNC );
         palabrasReservadas.put("if", TipoToken.IF);
         palabrasReservadas.put("null",TipoToken.NULL );
         palabrasReservadas.put("or", TipoToken.OR);
@@ -27,7 +27,7 @@ public class Scanner {
         palabrasReservadas.put("super",TipoToken.SUPER);
         palabrasReservadas.put("this", TipoToken.THIS);
         palabrasReservadas.put("true", TipoToken.TRUE);
-        palabrasReservadas.put("var", TipoToken.VAR); //definir variables
+        palabrasReservadas.put("var", TipoToken.VAR);
         palabrasReservadas.put("while", TipoToken.WHILE);
     }
 
@@ -46,7 +46,8 @@ public class Scanner {
         String readChain = source;
         String subChain;
         String concatChain = "";
-        Double numberChain = 0.0;
+        double numberDouble = 0.0;
+        int numberInt = 0;
 
         int large;
         large = readChain.length();
@@ -60,7 +61,7 @@ public class Scanner {
             System.out.println(c);
 
             switch (state) {
-                case 0:
+                case 0 -> {
                     switch (c) {
                         case "(" -> tokens.add(new Token(TipoToken.LEFT_PARANTHESIS, "(", null, linea));
                         case ")" -> tokens.add(new Token(TipoToken.RIGHT_PARANTHESIS, ")", null, linea));
@@ -103,39 +104,40 @@ public class Scanner {
                         }
 
                         default -> {
-                            if (c.matches("[A-Za-z0-9]")){
+                            if (c.matches("[A-Za-z0-9]")) {
                                 state = 10;
                                 i--;
                             }
                         }
                     }
-                    break;
-                case 10:
+                }
+                case 10 -> {
                     if (c.matches("[A-Za-z0-9.]")) {
-                            subChain = readChain.substring(i,i+1);
-                            concatChain = concatChain.concat(subChain);
+                        subChain = readChain.substring(i, i + 1);
+                        concatChain = concatChain.concat(subChain);
                     } else {
-                        if (concatChain.matches("[0-9.]+")){
+                        if (concatChain.matches("[0-9]+")) {
                             try {
-                                numberChain = Double.parseDouble(concatChain);
-                            }catch (NumberFormatException ex){
+                                numberInt = Integer.parseInt(concatChain);
+                            } catch (NumberFormatException ex) {
                                 ex.printStackTrace();
                             }
-                            tokens.add(new Token(TipoToken.NUMBER, "Number",numberChain , linea));
-                        } else{
-                            tokens.add(new Token(TipoToken.TEXT, "Text",concatChain , linea));
+                            tokens.add(new Token(TipoToken.NUMBER, "Number", numberInt, linea));
+                        } else if (concatChain.matches("[0-9.]+")){
+                            try {
+                                numberDouble = Double.parseDouble(concatChain);
+                            } catch (NumberFormatException ex) {
+                                ex.printStackTrace();
+                            }
+                            tokens.add(new Token(TipoToken.NUMBER, "Number", numberDouble, linea));
+                        }else{
+                            tokens.add(new Token(TipoToken.TEXT, "Text", concatChain, linea));
                         }
 
-                        state = 0;
+                        state = 0; numberInt = 0; numberDouble = 0.0; concatChain = "";
                         i--;
                     }
-                    // generar el token
-                    // retroceder i en 1
-                    //comparar el lexema con las palabras reservadas
-                    //Si coincide, creas el token correspondiente para la palabra reservada
-                    // caso contrario creas el token de identificador
-
-                    break;
+                }
 
             }
 
@@ -143,7 +145,9 @@ public class Scanner {
         }
         tokens.add(new Token(TipoToken.EOF, "", null, linea));
         return tokens;
+
     }
+
 
     /*
 Signos o símbolos del lenguaje:
