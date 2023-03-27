@@ -10,7 +10,7 @@ public class Scanner {
 
     public int linea = 1;
 
-    private static final Map<String, TipoToken> palabrasReservadas;
+    public static final Map<String, TipoToken> palabrasReservadas;
     static {
         palabrasReservadas = new HashMap<>();
         palabrasReservadas.put("and", TipoToken.AND);
@@ -36,24 +36,12 @@ public class Scanner {
     }
 
     List<Token> scanTokens(){
-        //Aquí va el corazón del scanner.
 
-        /*
-        Analizar el texto de entrada para extraer todos los tokens
-        y al final agregar el token de fin de archivo
-         */
-
-        String readChain = source;
-        String subChain;
-        String concatChain = "";
+        String readChain = source; String subChain; String concatChain = "";
         double numberDouble = 0.0;
-        int numberInt = 0;
-
-        int large;
+        int numberInt = 0; int large; int state = 0;
         large = readChain.length();
         System.out.println(large);
-
-        int state = 0;
 
         for (int i = 0; i<large; i+=1){
 
@@ -131,6 +119,7 @@ public class Scanner {
                             }
                             tokens.add(new Token(TipoToken.NUMBER, "Number", numberDouble, linea));
                         }else{
+
                             tokens.add(new Token(TipoToken.TEXT, "Text", concatChain, linea));
                         }
 
