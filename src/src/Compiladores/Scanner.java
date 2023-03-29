@@ -118,10 +118,11 @@ public class Scanner {
                                 ex.printStackTrace();
                             }
                             tokens.add(new Token(TipoToken.NUMBER, "Number", numberDouble, linea));
-                        }else{
-
-                            tokens.add(new Token(TipoToken.TEXT, "Text", concatChain, linea));
-                        }
+                        } else if (palabrasReservadas.containsKey(concatChain)) {
+                                tokens.add(new Token(palabrasReservadas.get(concatChain), "PalbraReservada", concatChain, linea));
+                            }else{
+                                tokens.add(new Token(TipoToken.TEXT, "Text", concatChain, linea));
+                            }
 
                         state = 0; numberInt = 0; numberDouble = 0.0; concatChain = "";
                         i--;
