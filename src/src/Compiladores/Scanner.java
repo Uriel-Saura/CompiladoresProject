@@ -39,14 +39,14 @@ public class Scanner {
 
         String readChain = source; String subChain; String concatChain = "";
         double numberDouble = 0.0;
-        int numberInt = 0; int large; int state = 0;
+        int numberInt = 0; int large; int state = 0; int flag = 0;
         large = readChain.length();
         System.out.println(large);
 
         for (int i = 0; i<large; i+=1){
 
             String c = readChain.substring(i,i+1);
-            System.out.println(c);
+            //System.out.println(c);
 
             switch (state) {
                 case 0 -> {
@@ -57,11 +57,16 @@ public class Scanner {
                         case "}" -> tokens.add(new Token(TipoToken.RIGHT_BRACKET, "}", null, linea));
                         case "," -> tokens.add(new Token(TipoToken.COMMA, ",", null, linea));
                         case "." -> tokens.add(new Token(TipoToken.POINT, ".", null, linea));
-                        case "/" -> tokens.add(new Token(TipoToken.SLASH, "/", null, linea));
                         case "-" -> tokens.add(new Token(TipoToken.MINUS_SIGN, "-", null, linea));
                         case "+" -> tokens.add(new Token(TipoToken.PLUS_SIGN, "+", null, linea));
                         case "*" -> tokens.add(new Token(TipoToken.MULTIPLICATION_SIGN, "*", null, linea));
                         case ";" -> tokens.add(new Token(TipoToken.SEMICOLON, ";", null, linea));
+                        case "/" -> {
+                            if (flag == 0){
+                                state = 1;
+                            } else
+                                tokens.add(new Token(TipoToken.SLASH, "/", null, linea));
+                        }
                         case "!" -> {
                             if (readChain.charAt(i + 1) == '=') {
                                 tokens.add(new Token(TipoToken.NOT_EQUALS_OPERATOR, "!=", null, linea));
@@ -86,16 +91,28 @@ public class Scanner {
                         case ">" -> {
                             if (readChain.charAt(i + 1) == '=') {
                                 tokens.add(new Token(TipoToken.GREATHER_THAN_EQUALS, ">=", null, linea));
-                                i++;
                             } else
                                 tokens.add(new Token(TipoToken.GREATER_THAN, ">", null, linea));
                         }
-
                         default -> {
                             if (c.matches("[A-Za-z0-9]")) {
                                 state = 10;
                                 i--;
                             }
+                        }
+                    }
+                }
+                case 1 -> {
+                    switch (c){
+                        case "/" ->  state = 2;
+                        case "*" ->  state = 2;
+                        default -> { flag = 1; state = 0; i--; i--;}
+                    }
+                }
+                case 2 -> {
+                    if (readChain.charAt(i) == '*'){
+                        if (readChain.charAt(i +1) == '/') {
+                            state = 0;
                         }
                     }
                 }
@@ -110,19 +127,19 @@ public class Scanner {
                             } catch (NumberFormatException ex) {
                                 ex.printStackTrace();
                             }
-                            tokens.add(new Token(TipoToken.NUMBER, "Number", numberInt, linea));
+                            tokens.add(new Token(TipoToken.NUMBER, concatChain, numberInt, linea));
                         } else if (concatChain.matches("[0-9.]+")){
                             try {
                                 numberDouble = Double.parseDouble(concatChain);
                             } catch (NumberFormatException ex) {
                                 ex.printStackTrace();
                             }
-                            tokens.add(new Token(TipoToken.NUMBER, "Number", numberDouble, linea));
+                            tokens.add(new Token(TipoToken.NUMBER, concatChain, numberDouble, linea));
                         } else if (palabrasReservadas.containsKey(concatChain)) {
-                                tokens.add(new Token(palabrasReservadas.get(concatChain), "PalbraReservada", concatChain, linea));
-                            }else{
-                                tokens.add(new Token(TipoToken.TEXT, "Text", concatChain, linea));
-                            }
+                                tokens.add(new Token(palabrasReservadas.get(concatChain), concatChain, null, linea));
+                        } else {
+                                tokens.add(new Token(TipoToken.TEXT, concatChain, concatChain, linea));
+                        }
 
                         state = 0; numberInt = 0; numberDouble = 0.0; concatChain = "";
                         i--;
@@ -131,13 +148,11 @@ public class Scanner {
 
             }
 
-
         }
         tokens.add(new Token(TipoToken.EOF, "", null, linea));
         return tokens;
 
     }
-
 
     /*
 Signos o símbolos del lenguaje:
