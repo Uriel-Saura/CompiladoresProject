@@ -37,16 +37,14 @@ public class Scanner {
 
     List<Token> scanTokens(){
 
-        String readChain = source; String subChain; String concatChain = "";
+        String readChain = source; String subChain; String concatChain = ""; String literal = "";
         double numberDouble = 0.0;
         int numberInt = 0; int large; int state = 0; int flag = 0;
         large = readChain.length();
-        System.out.println(large);
 
         for (int i = 0; i<large; i+=1){
 
             String c = readChain.substring(i,i+1);
-            //System.out.println(c);
 
             switch (state) {
                 case 0 -> {
@@ -64,8 +62,10 @@ public class Scanner {
                         case "/" -> {
                             if (flag == 0){
                                 state = 1;
-                            } else
+                            } else {
+                                flag = 0;
                                 tokens.add(new Token(TipoToken.SLASH, "/", null, linea));
+                            }
                         }
                         case "!" -> {
                             if (readChain.charAt(i + 1) == '=') {
@@ -95,18 +95,21 @@ public class Scanner {
                                 tokens.add(new Token(TipoToken.GREATER_THAN, ">", null, linea));
                         }
                         default -> {
-                            if (c.matches("[A-Za-z0-9]")) {
+                            if (c.matches("[A-Za-z\"]")) {
                                 state = 10;
+                                i--;
+                            } else if(c.matches("[0-9]")) {
+                                state = 20;
                                 i--;
                             }
                         }
                     }
                 }
                 case 1 -> {
-                    switch (c){
-                        case "/" ->  state = 2;
-                        case "*" ->  state = 2;
-                        default -> { flag = 1; state = 0; i--; i--;}
+                    if (c.equals("/") || c.equals("*")){
+                        state = 2;
+                    } else {
+                        flag = 1; state = 0; i--; i--;
                     }
                 }
                 case 2 -> {
@@ -117,7 +120,23 @@ public class Scanner {
                     }
                 }
                 case 10 -> {
-                    if (c.matches("[A-Za-z0-9.]")) {
+                    if (c.matches("[A-Za-z\"]") || c.equals(" ")) {
+                        subChain = readChain.substring(i, i + 1);
+                        concatChain = concatChain.concat(subChain);
+                        literal = concatChain;
+                        literal = literal.replaceAll("\"","");
+                    } else {
+                         if (palabrasReservadas.containsKey(concatChain)) {
+                                tokens.add(new Token(palabrasReservadas.get(concatChain), concatChain, null, linea));
+                        } else {
+                                tokens.add(new Token(TipoToken.IDENTIFIER, concatChain, literal, linea));
+                        }
+                         state = 0;concatChain = "";
+                         i--;
+                    }
+                }
+                case 20 ->{
+                    if (c.matches("[0-9.]")) {
                         subChain = readChain.substring(i, i + 1);
                         concatChain = concatChain.concat(subChain);
                     } else {
@@ -135,17 +154,11 @@ public class Scanner {
                                 ex.printStackTrace();
                             }
                             tokens.add(new Token(TipoToken.NUMBER, concatChain, numberDouble, linea));
-                        } else if (palabrasReservadas.containsKey(concatChain)) {
-                                tokens.add(new Token(palabrasReservadas.get(concatChain), concatChain, null, linea));
-                        } else {
-                                tokens.add(new Token(TipoToken.TEXT, concatChain, concatChain, linea));
                         }
-
                         state = 0; numberInt = 0; numberDouble = 0.0; concatChain = "";
                         i--;
                     }
                 }
-
             }
 
         }
